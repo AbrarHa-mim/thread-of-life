@@ -1,30 +1,131 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
-const mockData = {
-  events: [
-    { year: 2027, side: "right", title: "First Job", desc: "Joined a company. Title: Junior Something." },
-    { year: 2028, side: "left", title: "Cat Acquired", desc: "A small orange cat appeared. You named it Beta." },
-    { year: 2029, side: "right", title: "The Struggle Year", desc: "Everything felt off. Bought 3 self-help books. Read: 0." },
-    { year: 2031, side: "left", title: "Married", desc: "To someone who tolerates your existence." },
-    { year: 2032, side: "right", title: "Promotion", desc: "Finally recognized. New title: Senior Something." }
-  ],
-  footnotes: [
-    "2026 — You will lose your office ID card. Twice.",
-    "2028 — You will argue with a rickshaw driver. You will lose.",
-    "2033 — You will consider getting another cat. Beta will veto this."
-  ]
-};
-
-const questions = [
-  'আপনার নাম?',
-  'আপনার বয়স?',
-  'আপনার শখ?',
-  'রাত ৩টায় ফ্রিজ খুললে কী খুঁজে পান?',
-  'বিড়াল আপনার চায়ের কাপ থেকে চা খেয়ে ফেললে আপনার প্রতিক্রিয়া?',
-  'আপনার জীবনের সবচেয়ে বড় মিথ্যা কী ছিল?'
+// DATA POOLS
+const questionsPool = [
+  "আপনার নাম?",
+  "আপনার বয়স?",
+  "আপনার ব্রাউজার হিস্ট্রিতে সবচেয়ে অদ্ভুত সার্চ কী?",
+  "রাত ৩টায় ফ্রিজ খুললে কী খুঁজে পান?",
+  "আপনার সবচেয়ে অকাজের ট্যালেন্ট কী?",
+  "চা না কফি? (সত্যি বলবেন)",
+  "আপনি কি কখনো অচেনা মানুষের সাথে রিকশা শেয়ার করেছেন?",
+  "আপনার জীবনের সবচেয়ে বড় মিথ্যা কী ছিল?",
+  "মোবাইল চার্জার ছাড়া বাইরে গেলে আপনার কি হয়?",
+  "রাস্তায় টাকা পড়ে থাকলে আপনি কি নেন?",
+  "আপনার লাস্ট গুগল সার্চ কি ছিল?",
+  "বাসে কেউ সিট নিয়ে নিলে আপনি কী করেন?",
+  "Sorry, payment হয়ে গেছে — দিনে কতবার বলেন?",
+  "আপনার সবচেয়ে অলস দিনের রুটিন কী?",
+  "এমন কোনো খাবার আছে যা আপনি কখনো ভাগ করেন না?",
+  "আপনি কি কখনো গোসল না করেই বাইরে বেরিয়েছেন?",
+  "আপনার সবচেয়ে বাজে জোকস কোনটা?",
+  "বৃষ্টির দিনে আপনি সাধারণত কী করেন?",
+  "আপনার ফোনের ব্যাটারি ১% হলে আপনি কী করেন?",
+  "কোনো জিনিস হারিয়ে ফেললে আপনি কতক্ষণ খোঁজেন?",
 ];
+
+const majorEventsPool = [
+  { side: "right", title: "First Real Job", desc: "Started working. Pretended to understand everything." },
+  { side: "left", title: "Married", desc: "To someone who tolerates your existence. Mostly." },
+  { side: "right", title: "Promotion", desc: "New title. Same work. You acted surprised." },
+  { side: "left", title: "Child Born", desc: "A small human arrived. You panic daily." },
+  { side: "right", title: "Career Peak", desc: "You finally feel competent. It lasts 3 months." },
+  { side: "left", title: "Major Loss", desc: "Someone close left. You never fully recovered." },
+  { side: "right", title: "Retirement", desc: "Stopped working. Realized you have no hobbies." },
+  { side: "left", title: "House Purchased", desc: "Bought a home. Mortgage: 25 years." },
+  { side: "right", title: "Business Failed", desc: "Tried entrepreneurship. Lost everything. Back to job." },
+  { side: "left", title: "Second Marriage", desc: "After divorce. This one lasted." },
+  { side: "right", title: "Fired", desc: "Lost your job at 42. Survived. Barely." },
+  { side: "left", title: "Health Scare", desc: "A hospital stay. Changed your priorities. For a month." },
+  { side: "right", title: "Moved Abroad", desc: "Started over in a new country. Regretted it twice." },
+  { side: "left", title: "Debt Cleared", desc: "Finally paid everything off. Felt free for 6 days." },
+  { side: "right", title: "Side Business", desc: "Turned a hobby into income. Barely sustainable." },
+];
+
+const deathDescriptions = [
+  "Death. Cause: Tuesday.",
+  "Death. You were 3 minutes late to your own funeral.",
+  "Death. Reason: Forgot to update antivirus.",
+  "Death. The universe got bored.",
+  "Death. Final words: 'Just 5 more minutes.'",
+  "Death. No refunds issued.",
+  "Death. Your to-do list remains unfinished.",
+  "Death. Cause: Pending investigation since 2047.",
+  "Death. You finally got some rest.",
+  "Death. Occurs on a Monday. Classic.",
+];
+
+const rejectedPool = [
+  { title: "YouTuber", reason: "Views: 3. Subscribers: 1 (mom). Deleted 2030." },
+  { title: "Chef", reason: "You burn water on day 1." },
+  { title: "Politician", reason: "47 'um's in first speech." },
+  { title: "Astronaut", reason: "Failed the height requirement by 1 inch." },
+  { title: "Stand-up Comedian", reason: "You forgot the punchline. Every single time." },
+  { title: "Billionaire", reason: "Invested all your money in a friend's 'genius' idea." },
+];
+
+const footnotesPool = [
+  "You will lose your office ID card. Twice.",
+  "You will argue with a rickshaw driver. You will lose.",
+  "You will cry at a Zara ad. Cause: unknown.",
+  "You will finally reply. Too late.",
+  "You will learn to cook exactly one dish: khichuri.",
+  "You will say 'last 5 minutes' and take 45 minutes.",
+  "You will forget your own password. Again.",
+  "You will pretend to read an article but only read the headline.",
+  "You will accidentally like an ex's photo from 2018.",
+  "You will buy a gym membership and use it 4 times.",
+];
+
+// Randomization helper
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// MOCK API: Generate future based on user data
+function generateFuture(name: string, age: number) {
+  // Death age between 60-80
+  const deathAge = 60 + Math.floor(Math.random() * 21);
+
+  // Calculate lifespan remaining
+  const yearsLeft = deathAge - age;
+
+  // Pick 5 major events (not including death)
+  const selectedEvents = shuffleArray(majorEventsPool).slice(0, 5);
+
+  // Spread events across lifespan
+  const events = selectedEvents.map((event, index) => {
+    const ageGap = Math.floor(yearsLeft / 6); // Divide lifespan into chunks
+    const eventAge = age + (index + 1) * ageGap + Math.floor(Math.random() * 3);
+    return {
+      ...event,
+      age: Math.min(eventAge, deathAge - 1) // Don't exceed death age
+    };
+  }).sort((a, b) => a.age - b.age);
+
+  // Add Death as final event
+  const deathDesc = deathDescriptions[Math.floor(Math.random() * deathDescriptions.length)];
+  events.push({
+    age: deathAge,
+    side: "center" as const,
+    title: "Death",
+    desc: deathDesc
+  });
+
+  return {
+    deathAge,
+    events,
+    rejected: shuffleArray(rejectedPool).slice(0, 3),
+    footnotes: shuffleArray(footnotesPool).slice(0, 3)
+  };
+}
 
 export default function Home() {
   const [screen, setScreen] = useState<'entry' | 'form' | 'loading' | 'result'>('entry');
@@ -33,10 +134,19 @@ export default function Home() {
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [loadingStep, setLoadingStep] = useState(0);
 
+  // Randomize questions on mount
+  const randomQuestions = useMemo(() => {
+    return shuffleArray(questionsPool).slice(0, 6);
+  }, []);
+
+  // Generate future data when form completes
+  const [futureData, setFutureData] = useState<ReturnType<typeof generateFuture> | null>(null);
+
   const loadingTexts = [
     '> Opening file BPF/2026/4471...',
     '> Retrieving karma records...',
     '> Cross-referencing with fate board...',
+    '> Calculating lifespan...',
     '> Warning: 3 rejected timelines found.',
     '> Timeline accuracy: 61%.',
     '> Ready.'
@@ -51,13 +161,18 @@ export default function Home() {
         }, 600);
         return () => clearTimeout(timer);
       } else {
+        // Generate future data before showing result
+        const name = answers[0] || 'Unknown';
+        const age = parseInt(answers[1]) || 25;
+        setFutureData(generateFuture(name, age));
+
         const finalTimer = setTimeout(() => {
           setScreen('result');
-        }, 1000);
+        }, 800);
         return () => clearTimeout(finalTimer);
       }
     }
-  }, [screen, loadingStep]);
+  }, [screen, loadingStep, answers]);
 
   // Form Enter key handler
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -66,13 +181,16 @@ export default function Home() {
       setAnswers(newAnswers);
       setCurrentAnswer('');
 
-      if (currentQuestion < questions.length - 1) {
+      if (currentQuestion < randomQuestions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         setScreen('loading');
       }
     }
   };
+
+  const currentYear = new Date().getFullYear();
+  const userAge = parseInt(answers[1]) || 25;
 
   // ENTRY SCREEN
   if (screen === 'entry') {
@@ -181,11 +299,11 @@ export default function Home() {
             color: '#1A1A1A',
             fontWeight: 500,
           }}>
-            {questions[currentQuestion]}
+            {randomQuestions[currentQuestion]}
           </h2>
 
           <input
-            type="text"
+            type={currentQuestion === 1 ? "number" : "text"}
             value={currentAnswer}
             onChange={(e) => setCurrentAnswer(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -223,7 +341,7 @@ export default function Home() {
         }}>
           <div style={{
             height: '100%',
-            width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+            width: `${((currentQuestion + 1) / randomQuestions.length) * 100}%`,
             background: '#C4422D',
             transition: 'width 0.3s',
           }} />
@@ -261,7 +379,9 @@ export default function Home() {
     );
   }
 
-  // RESULT SCREEN - THE THREAD
+  // RESULT SCREEN - LIFESPAN TIMELINE
+  if (!futureData) return null;
+
   return (
     <div style={{
       width: '100vw',
@@ -283,12 +403,13 @@ export default function Home() {
         fontSize: '11px',
         textAlign: 'center',
         lineHeight: '1.6',
-        maxWidth: '200px',
+        maxWidth: '220px',
       }}>
         <div style={{ fontWeight: 'bold' }}>⚠ FATE BOARD WARNING</div>
         <div style={{ fontSize: '10px', marginTop: '8px' }}>
           Timeline accuracy: 61%<br/>
-          Choices alter the path.
+          Projected lifespan: {futureData.deathAge} years<br/>
+          No appeals accepted.
         </div>
       </div>
 
@@ -306,135 +427,189 @@ export default function Home() {
         CONFIDENTIAL
       </div>
 
-      {/* 3-Column Grid Layout */}
+      {/* "You, Now" marker at TOP */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 120px 1fr',
-        gap: '40px',
-        maxWidth: '1200px',
-        margin: '0 auto',
+        textAlign: 'center',
         marginTop: '100px',
+        marginBottom: '60px',
       }}>
-        {/* LEFT COLUMN - Personal Events */}
-        <div style={{ textAlign: 'right' }}>
-          {mockData.events.filter(e => e.side === 'left').map((event, i) => (
-            <div key={i} style={{ marginBottom: '120px' }}>
-              <div className="font-mono" style={{
-                fontSize: '12px',
-                color: '#8B8378',
-                marginBottom: '8px',
-              }}>
-                {event.year}
-              </div>
-              <h3 className="font-serif" style={{
-                fontSize: '24px',
-                marginBottom: '8px',
-                color: '#1A1A1A',
-              }}>
-                {event.title}
-              </h3>
-              <p className="font-mono" style={{
-                fontSize: '12px',
-                color: '#8B8378',
-                lineHeight: '1.6',
-              }}>
-                {event.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* CENTER COLUMN - Thread Line & Years */}
         <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          position: 'relative',
+          width: '12px',
+          height: '12px',
+          background: '#C4422D',
+          margin: '0 auto 12px',
+        }} />
+        <div className="font-bengali" style={{
+          fontSize: '20px',
+          fontWeight: 600,
         }}>
-          {/* Wobbly SVG line */}
-          <svg
-            width="2"
-            height="100%"
-            style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)' }}
-          >
-            <path
-              d="M1 0 Q 3 100 1 200 Q -1 300 1 400 Q 3 500 1 600 Q -1 700 1 800 Q 3 900 1 1000"
-              stroke="#1A1A1A"
-              strokeWidth="2"
-              fill="none"
-            />
-          </svg>
-
-          {/* Year markers */}
-          {mockData.events.map((event, i) => (
-            <div key={i} style={{
-              marginBottom: '120px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <div style={{
-                width: '8px',
-                height: '8px',
-                background: '#1A1A1A',
-                border: '2px solid #F2EDE4',
-              }} />
-            </div>
-          ))}
-
-          {/* Present marker */}
-          <div style={{ marginTop: '40px', textAlign: 'center' }}>
-            <div style={{
-              width: '12px',
-              height: '12px',
-              background: '#C4422D',
-              margin: '0 auto 12px',
-            }} />
-            <div className="font-serif" style={{ fontSize: '16px' }}>
-              You, now
-            </div>
-          </div>
+          আপনি, এখন
         </div>
-
-        {/* RIGHT COLUMN - Career Events */}
-        <div style={{ textAlign: 'left' }}>
-          {mockData.events.filter(e => e.side === 'right').map((event, i) => (
-            <div key={i} style={{ marginBottom: '120px' }}>
-              <div className="font-mono" style={{
-                fontSize: '12px',
-                color: '#8B8378',
-                marginBottom: '8px',
-              }}>
-                {event.year}
-              </div>
-              <h3 className="font-serif" style={{
-                fontSize: '24px',
-                marginBottom: '8px',
-                color: '#1A1A1A',
-              }}>
-                {event.title}
-              </h3>
-              <p className="font-mono" style={{
-                fontSize: '12px',
-                color: '#8B8378',
-                lineHeight: '1.6',
-              }}>
-                {event.desc}
-              </p>
-            </div>
-          ))}
+        <div className="font-mono" style={{
+          fontSize: '11px',
+          color: '#8B8378',
+          marginTop: '4px',
+        }}>
+          Age {userAge} · Year {currentYear}
         </div>
       </div>
 
-      {/* Footnotes - scattered below */}
+      {/* Timeline flows DOWNWARDS by AGE */}
       <div style={{
         maxWidth: '1200px',
-        margin: '80px auto 0',
+        margin: '0 auto',
+      }}>
+        {futureData.events.map((event, index) => {
+          const isDeathEvent = event.title === "Death";
+          const yearFromNow = currentYear + (event.age - userAge);
+
+          return (
+            <div
+              key={index}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: event.side === 'center' ? '1fr' : '1fr 120px 1fr',
+                gap: '40px',
+                marginBottom: isDeathEvent ? '40px' : '100px',
+                alignItems: 'start',
+              }}
+            >
+              {event.side === 'center' ? (
+                // DEATH EVENT - CENTER ALIGNED
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px',
+                  border: '3px solid #C4422D',
+                  background: '#F2EDE4',
+                }}>
+                  <div className="font-mono" style={{
+                    fontSize: '12px',
+                    color: '#C4422D',
+                    marginBottom: '12px',
+                    letterSpacing: '2px',
+                  }}>
+                    AGE {event.age} · YEAR {yearFromNow}
+                  </div>
+                  <h3 className="font-serif" style={{
+                    fontSize: '32px',
+                    marginBottom: '12px',
+                    color: '#C4422D',
+                  }}>
+                    {event.title}
+                  </h3>
+                  <p className="font-mono" style={{
+                    fontSize: '13px',
+                    color: '#8B8378',
+                    lineHeight: '1.6',
+                  }}>
+                    {event.desc}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* LEFT COLUMN */}
+                  <div style={{ textAlign: 'right' }}>
+                    {event.side === 'left' && (
+                      <>
+                        <div className="font-mono" style={{
+                          fontSize: '12px',
+                          color: '#8B8378',
+                          marginBottom: '8px',
+                        }}>
+                          Age {event.age} · {yearFromNow}
+                        </div>
+                        <h3 className="font-serif" style={{
+                          fontSize: '24px',
+                          marginBottom: '8px',
+                          color: '#1A1A1A',
+                        }}>
+                          {event.title}
+                        </h3>
+                        <p className="font-mono" style={{
+                          fontSize: '12px',
+                          color: '#8B8378',
+                          lineHeight: '1.6',
+                        }}>
+                          {event.desc}
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  {/* CENTER - Thread dot */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    position: 'relative',
+                  }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      background: '#1A1A1A',
+                      border: '2px solid #F2EDE4',
+                      position: 'relative',
+                      zIndex: 2,
+                    }} />
+
+                    {/* Connecting line to next event */}
+                    {index < futureData.events.length - 1 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '8px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '2px',
+                        height: isDeathEvent ? '80px' : '140px',
+                        background: '#1A1A1A',
+                        zIndex: 1,
+                      }} />
+                    )}
+                  </div>
+
+                  {/* RIGHT COLUMN */}
+                  <div style={{ textAlign: 'left' }}>
+                    {event.side === 'right' && (
+                      <>
+                        <div className="font-mono" style={{
+                          fontSize: '12px',
+                          color: '#8B8378',
+                          marginBottom: '8px',
+                        }}>
+                          Age {event.age} · {yearFromNow}
+                        </div>
+                        <h3 className="font-serif" style={{
+                          fontSize: '24px',
+                          marginBottom: '8px',
+                          color: '#1A1A1A',
+                        }}>
+                          {event.title}
+                        </h3>
+                        <p className="font-mono" style={{
+                          fontSize: '12px',
+                          color: '#8B8378',
+                          lineHeight: '1.6',
+                        }}>
+                          {event.desc}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footnotes */}
+      <div style={{
+        maxWidth: '1200px',
+        margin: '100px auto 0',
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
       }}>
-        {mockData.footnotes.map((note, i) => (
+        {futureData.footnotes.map((note, i) => (
           <div
             key={i}
             className="font-mono"
@@ -453,7 +628,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Rejected Timelines - bottom section */}
+      {/* Rejected Timelines */}
       <div style={{
         maxWidth: '800px',
         margin: '120px auto 80px',
@@ -468,23 +643,16 @@ export default function Home() {
         </h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ border: '1px solid #C4BDB2', padding: '20px', color: '#C4BDB2' }}>
-            <div className="font-serif" style={{ fontSize: '18px', marginBottom: '8px' }}>
-              [ Rejected: YouTuber ✕ ]
+          {futureData.rejected.map((rejected, i) => (
+            <div key={i} style={{ border: '1px solid #C4BDB2', padding: '20px', color: '#C4BDB2' }}>
+              <div className="font-serif" style={{ fontSize: '18px', marginBottom: '8px' }}>
+                [ Rejected: {rejected.title} ✕ ]
+              </div>
+              <div className="font-mono" style={{ fontSize: '11px' }}>
+                {rejected.reason}
+              </div>
             </div>
-            <div className="font-mono" style={{ fontSize: '11px' }}>
-              Views: 3. Subscribers: 1 (mom). Deleted 2030.
-            </div>
-          </div>
-
-          <div style={{ border: '1px solid #C4BDB2', padding: '20px', color: '#C4BDB2' }}>
-            <div className="font-serif" style={{ fontSize: '18px', marginBottom: '8px' }}>
-              [ Rejected: Chef ✕ ]
-            </div>
-            <div className="font-mono" style={{ fontSize: '11px' }}>
-              You burn water on day 1.
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
