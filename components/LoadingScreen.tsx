@@ -34,28 +34,22 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     if (currentLine < steps.length) {
       const timer = setTimeout(() => {
         setCurrentLine(currentLine + 1);
-      }, 400);
+      }, 500);
       return () => clearTimeout(timer);
     } else {
-      const finalTimer = setTimeout(onComplete, 800);
+      const finalTimer = setTimeout(onComplete, 1000);
       return () => clearTimeout(finalTimer);
     }
   }, [currentLine, steps.length, onComplete]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, backgroundColor: '#ffffff' }}
-      animate={{ opacity: 1, backgroundColor: 'var(--paper)' }}
-      transition={{ duration: 0.3 }}
-      className="min-h-screen flex flex-col items-start justify-center px-8 md:px-16 lg:px-24"
-    >
-      <div className="font-mono text-sm md:text-base space-y-3 max-w-2xl">
+    <div className="w-screen h-screen bg-[var(--paper)] flex items-center px-12 md:px-20 lg:px-32">
+      <div className="font-mono text-sm space-y-3">
         {steps.slice(0, currentLine).map((line, index) => (
           <motion.div
             key={index}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             className={index === steps.length - 1 ? 'text-[var(--accent)]' : ''}
           >
             {line}
@@ -63,13 +57,13 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         ))}
 
         {currentLine < steps.length && (
-          <motion.div
-            animate={{ opacity: [1, 0.3, 1] }}
+          <motion.span
+            animate={{ opacity: [1, 0, 1] }}
             transition={{ duration: 0.8, repeat: Infinity }}
             className="inline-block w-2 h-4 bg-[var(--ink)] ml-1"
           />
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

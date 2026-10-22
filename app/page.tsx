@@ -31,7 +31,7 @@ export default function Home() {
 
   return (
     <LanguageProvider>
-      <main>
+      <main style={{ position: 'relative', zIndex: 2 }}>
         {currentScreen === 'entry' && (
           <EntryScreen onEnter={() => setCurrentScreen('form')} />
         )}

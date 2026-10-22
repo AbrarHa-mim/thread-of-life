@@ -93,15 +93,14 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-start px-8 md:px-16 lg:px-24">
-      <div className="w-full max-w-2xl">
+    <div className="w-screen h-screen bg-[var(--paper)] flex items-center px-12 md:px-20 lg:px-32">
+      <div className="w-full max-w-3xl">
         {/* Step indicator */}
         <motion.div
           key={`step-${currentStep}`}
-          initial={{ opacity: 0, x: direction * 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
-          className="font-mono text-xs text-[var(--muted)] mb-8 tracking-wider"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="font-mono text-[10px] text-[var(--muted)] mb-8 tracking-widest"
         >
           STEP {String(currentStep + 1).padStart(2, '0')} / {String(questions.length).padStart(2, '0')}
         </motion.div>
@@ -112,10 +111,10 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
             initial={{ opacity: 0, x: direction * 40 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction * -40 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
+            transition={{ duration: 0.4 }}
           >
             {/* Question */}
-            <h2 className="font-serif text-3xl md:text-5xl mb-12 leading-tight">
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl mb-12 leading-tight">
               {t(currentQuestion.bn, currentQuestion.en)}
             </h2>
 
@@ -128,8 +127,7 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
                   onChange={(e) => handleChange(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleNext()}
                   autoFocus
-                  className="w-full bg-transparent border-0 border-b-2 border-[var(--ink)] focus:border-[var(--accent)] outline-none text-2xl pb-2 font-sans"
-                  style={{ caretColor: 'var(--accent)' }}
+                  className="w-full bg-transparent border-0 border-b-2 border-[var(--ink)] focus:border-[var(--accent)] text-2xl pb-2 font-sans"
                 />
               )}
 
@@ -142,19 +140,20 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
                   autoFocus
                   min="1"
                   max="120"
-                  className="w-full bg-transparent border-0 border-b-2 border-[var(--ink)] focus:border-[var(--accent)] outline-none text-2xl pb-2 font-mono"
-                  style={{ caretColor: 'var(--accent)' }}
+                  className="w-full bg-transparent border-0 border-b-2 border-[var(--ink)] focus:border-[var(--accent)] text-2xl pb-2 font-mono"
                 />
               )}
 
               {currentQuestion.type === 'select' && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {currentQuestion.options?.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => handleChange(option.value)}
-                      className={`block w-full text-left px-6 py-4 border border-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)] transition-colors ${
-                        currentValue === option.value ? 'bg-[var(--ink)] text-[var(--paper)]' : ''
+                      className={`block w-full text-left px-6 py-4 border border-[var(--ink)] transition-colors ${
+                        currentValue === option.value
+                          ? 'bg-[var(--ink)] text-[var(--paper)]'
+                          : 'hover:bg-[var(--ink)] hover:text-[var(--paper)]'
                       }`}
                     >
                       <span className="font-sans text-lg">
@@ -173,12 +172,9 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
                     max={currentQuestion.max}
                     value={(currentValue as number) ?? currentQuestion.min}
                     onChange={(e) => handleChange(Number(e.target.value))}
-                    className="w-full h-1 bg-[var(--divider)] appearance-none cursor-pointer slider"
-                    style={{
-                      accentColor: 'var(--accent)',
-                    }}
+                    className="w-full h-1 bg-[var(--divider)] cursor-pointer slider"
                   />
-                  <div className="font-mono text-4xl text-center text-[var(--accent)]">
+                  <div className="font-mono text-6xl text-center text-[var(--accent)]">
                     {(currentValue as number) ?? currentQuestion.min}
                   </div>
                 </div>
@@ -190,7 +186,7 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
               {currentStep > 0 ? (
                 <button
                   onClick={handleBack}
-                  className="font-mono text-sm text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
+                  className="font-mono text-sm text-[var(--muted)] hover:text-[var(--ink)]"
                 >
                   ← {t('পিছনে', 'Back')}
                 </button>
@@ -201,7 +197,7 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
               <button
                 onClick={handleNext}
                 disabled={!currentValue && currentValue !== 0}
-                className="font-mono text-lg border-b-2 border-[var(--ink)] hover:border-[var(--accent)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:border-[var(--muted)]"
+                className="font-mono text-base border-b-2 border-[var(--ink)] hover:border-[var(--accent)] disabled:opacity-30 disabled:pointer-events-none"
               >
                 [ {currentStep === questions.length - 1 ? t('শেষ', 'Done') : t('পরবর্তী', 'Next')} → ]
               </button>
@@ -210,19 +206,17 @@ export default function FormScreen({ onComplete }: FormScreenProps) {
         </AnimatePresence>
       </div>
 
-      {/* Progress bar at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 h-1 bg-[var(--divider)]">
+      {/* Progress bar */}
+      <div className="fixed bottom-0 left-0 right-0 h-[1px] bg-[var(--divider)]">
         <motion.div
           className="h-full bg-[var(--accent)]"
-          initial={{ width: 0 }}
           animate={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
-          transition={{ duration: 0.4 }}
         />
       </div>
 
       <style jsx>{`
         .slider::-webkit-slider-thumb {
-          appearance: none;
+          -webkit-appearance: none;
           width: 20px;
           height: 20px;
           background: var(--accent);

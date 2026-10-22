@@ -1,60 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+Bengali:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Design System Colors */
-  --paper: #F2EDE4;
-  --ink: #1A1A1A;
-  --muted: #8B8378;
-  --accent: #C4422D;
-  --divider: #D6CFC3;
-  --highlight: #B8923F;
-  --ghost: #C4BDB2;
-
-  /* Typography */
-  --font-serif: 'Instrument Serif', 'Georgia', serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #141210;
-    --ink: #E8E2D6;
-    --divider: #2A2622;
-  }
-}
-
-:root[data-theme="dark"] {
-  --paper: #141210;
-  --ink: #E8E2D6;
-  --divider: #2A2622;
-}
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  border-radius: 0 !important;
 }
 
-html {
-  scroll-behavior: smooth;
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background-color: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  background: #F2EDE4;
+  color: #1A1A1A;
+  font-family: 'Inter', sans-serif;
   position: relative;
 }
 
-/* Grain texture overlay */
+/* Minimalist Swiss grid background */
 body::before {
   content: '';
   position: fixed;
@@ -63,13 +34,32 @@ body::before {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' /%3E%3C/svg%3E");
-  z-index: 9999;
-  mix-blend-mode: multiply;
+  opacity: 0.3;
+  z-index: 0;
+  background-image:
+    /* Thin horizontal lines every 40px */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      #D6CFC3 39px,
+      #D6CFC3 40px
+    ),
+    /* Thin vertical lines - 3 columns */
+    linear-gradient(90deg,
+      transparent 0%,
+      transparent calc(33.33% - 0.5px),
+      #D6CFC3 calc(33.33% - 0.5px),
+      #D6CFC3 calc(33.33% + 0.5px),
+      transparent calc(33.33% + 0.5px),
+      transparent calc(66.66% - 0.5px),
+      #D6CFC3 calc(66.66% - 0.5px),
+      #D6CFC3 calc(66.66% + 0.5px),
+      transparent calc(66.66% + 0.5px)
+    );
 }
 
-/* Grid lines background */
+/* Subtle paper texture */
 body::after {
   content: '';
   position: fixed;
@@ -78,65 +68,8 @@ body::after {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  opacity: 0.25;
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 39px,
-    var(--divider) 39px,
-    var(--divider) 40px
-  );
-  z-index: 0;
-}
-
-/* Brutalist - no rounded corners */
-button,
-input,
-select,
-textarea,
-div[class*="border"] {
-  border-radius: 0 !important;
-}
-
-/* Typography utilities */
-.font-serif {
-  font-family: var(--font-serif);
-}
-
-.font-sans {
-  font-family: var(--font-sans);
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-/* Remove default button styles */
-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  color: inherit;
-}
-
-/* Input focus styles */
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-}
-
-/* Ensure all content is above the texture layers */
-#__next,
-main {
-  position: relative;
+  opacity: 0.03;
   z-index: 1;
-}
-
-/* Smooth color transitions only */
-button,
-input,
-a {
-  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' /%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
 }
