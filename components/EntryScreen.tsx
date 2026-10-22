@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EntryScreenProps {
@@ -11,61 +10,125 @@ export default function EntryScreen({ onEnter }: EntryScreenProps) {
   const { language, setLanguage, t } = useLanguage();
 
   return (
-    <div className="w-screen h-screen bg-[var(--paper)] flex items-center justify-center relative">
-      {/* Top left corner */}
-      <div className="absolute top-8 left-8 font-mono text-[11px] text-[var(--muted)] leading-tight">
-        BPF/2026/____<br />
-        CONFIDENTIAL
-      </div>
-
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      background: '#F2EDE4',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+    }}>
       {/* Language toggle - top right */}
-      <div className="absolute top-8 right-8 flex gap-2">
+      <div style={{
+        position: 'absolute',
+        top: '32px',
+        right: '32px',
+        display: 'flex',
+        gap: '8px',
+        zIndex: 10,
+      }}>
         <button
           onClick={() => setLanguage('bn')}
-          className={`font-mono text-xs px-2 py-1 border border-[var(--ink)] ${
-            language === 'bn' ? 'bg-[var(--ink)] text-[var(--paper)]' : ''
-          }`}
+          style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '11px',
+            padding: '6px 12px',
+            border: '1px solid #1A1A1A',
+            background: language === 'bn' ? '#1A1A1A' : 'transparent',
+            color: language === 'bn' ? '#F2EDE4' : '#1A1A1A',
+            cursor: 'pointer',
+          }}
         >
           বাংলা
         </button>
         <button
           onClick={() => setLanguage('en')}
-          className={`font-mono text-xs px-2 py-1 border border-[var(--ink)] ${
-            language === 'en' ? 'bg-[var(--ink)] text-[var(--paper)]' : ''
-          }`}
+          style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '11px',
+            padding: '6px 12px',
+            border: '1px solid #1A1A1A',
+            background: language === 'en' ? '#1A1A1A' : 'transparent',
+            color: language === 'en' ? '#F2EDE4' : '#1A1A1A',
+            cursor: 'pointer',
+          }}
         >
           EN
         </button>
       </div>
 
+      {/* Top left corner */}
+      <div style={{
+        position: 'absolute',
+        top: '32px',
+        left: '32px',
+        fontFamily: 'JetBrains Mono, monospace',
+        fontSize: '11px',
+        color: '#8B8378',
+        lineHeight: '1.5',
+      }}>
+        BPF/2026/____<br/>
+        CONFIDENTIAL
+      </div>
+
       {/* Center content */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="text-center px-8"
-      >
-        <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl mb-6 leading-tight max-w-4xl mx-auto">
+      <div style={{ textAlign: 'center', maxWidth: '900px', padding: '0 32px' }}>
+        <h1 style={{
+          fontFamily: language === 'bn' ? 'Noto Serif Bengali, serif' : 'Instrument Serif, serif',
+          fontSize: '56px',
+          lineHeight: '1.3',
+          marginBottom: '24px',
+          color: '#1A1A1A',
+          fontWeight: language === 'bn' ? 600 : 400,
+        }}>
           {t(
             'আপনি কি আপনার ভবিষ্যৎকে এক্সেপ্ট করার জন্য প্রস্তুত?',
             'Are you ready to accept your future?'
           )}
         </h1>
 
-        <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted)] mb-12">
+        <p style={{
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: '11px',
+          textTransform: 'uppercase',
+          letterSpacing: '2px',
+          color: '#8B8378',
+          marginBottom: '48px',
+        }}>
           {t('ব্যুরো অফ পার্সোনাল ফিউচারস · EST. 2026', 'BUREAU OF PERSONAL FUTURES · EST. 2026')}
         </p>
 
         <button
           onClick={onEnter}
-          className="font-mono text-base border-b-2 border-[var(--ink)] hover:border-[var(--accent)] transition-colors pb-1"
+          style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '16px',
+            color: '#1A1A1A',
+            background: 'none',
+            border: 'none',
+            borderBottom: '2px solid #1A1A1A',
+            cursor: 'pointer',
+            padding: '4px 0',
+            transition: 'border-color 0.2s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.borderColor = '#C4422D'}
+          onMouseLeave={(e) => e.currentTarget.style.borderColor = '#1A1A1A'}
         >
           [ {t('প্রবেশ করুন', 'Enter')} ]
         </button>
-      </motion.div>
+      </div>
 
       {/* Bottom privacy */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-[10px] text-[var(--muted)]">
+      <div style={{
+        position: 'absolute',
+        bottom: '32px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontFamily: 'JetBrains Mono, monospace',
+        fontSize: '10px',
+        color: '#8B8378',
+      }}>
         {t('আমরা আপনার ডেটা সংরক্ষণ করি না', "We don't save your data")}
       </div>
     </div>
